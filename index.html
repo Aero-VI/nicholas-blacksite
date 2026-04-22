@@ -3,307 +3,281 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pc.blacksite // Nicholas Halka</title>
-  <meta name="description" content="State-level operator profile for Nicholas Brian Halka — systems thinker, rule rewriter, ghost in the machine." />
+  <title>pc.gd // nicholas halka</title>
+  <meta name="description" content="retro terminal dossier for nicholas brian halka — aeroverra, robloxsharp, infrastructure, travel, exploits." />
   <style>
     :root {
-      --bg: #020406;
-      --bg-soft: #071017;
-      --panel: rgba(4, 8, 12, 0.92);
-      --panel-2: rgba(8, 13, 18, 0.95);
-      --line: rgba(140, 255, 199, 0.14);
-      --line-strong: rgba(140, 255, 199, 0.34);
-      --text: #edf6fb;
-      --muted: #8fa2ad;
-      --green: #9bffc9;
-      --cyan: #8cecff;
-      --gold: #f4ca77;
-      --red: #ff8ea1;
-      --shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+      --bg: #0a0a0a;
+      --fg: #00ff41;
+      --muted: #6b7280;
+      --muted-2: #888888;
+      --invert-bg: #00ff41;
+      --invert-fg: #0a0a0a;
+      --line: #00ff41;
+      --glow: 0 0 4px rgba(0, 255, 65, 0.4);
     }
 
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      color: var(--text);
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at top, rgba(140,255,199,0.06), transparent 18%),
-        radial-gradient(circle at 85% 0%, rgba(140,236,255,0.08), transparent 14%),
-        linear-gradient(180deg, var(--bg), #000 100%);
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Fira Code', 'JetBrains Mono', 'VT323', 'Courier New', monospace;
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
     }
-    body::before {
-      content: "";
+
+    ::selection {
+      background: var(--invert-bg);
+      color: var(--invert-fg);
+      text-shadow: none;
+    }
+
+    .scanlines {
       position: fixed;
       inset: 0;
       pointer-events: none;
-      background:
-        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);
-      background-size: 100% 3px, 40px 40px;
-      opacity: 0.26;
-    }
-    body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background: radial-gradient(circle at center, transparent 45%, rgba(0,0,0,0.5) 100%);
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.0) 0px,
+        rgba(0, 0, 0, 0.0) 2px,
+        rgba(0, 0, 0, 0.10) 3px,
+        rgba(0, 0, 0, 0.10) 4px
+      );
+      z-index: 10;
     }
 
-    a { color: inherit; }
-    .shell { width: min(1100px, calc(100% - 28px)); margin: 0 auto; position: relative; z-index: 1; }
-
-    .topbar {
-      position: sticky; top: 0; z-index: 30;
-      backdrop-filter: blur(12px);
-      background: rgba(1, 3, 5, 0.86);
-      border-bottom: 1px solid var(--line);
+    a {
+      color: var(--fg);
+      text-decoration: none;
+      text-shadow: var(--glow);
     }
-    .topbar-inner {
-      display: flex; justify-content: space-between; align-items: center; gap: 10px;
-      padding: 14px 0;
+    a:hover,
+    a:focus-visible {
+      background: var(--invert-bg);
+      color: var(--invert-fg);
+      text-shadow: none;
+      outline: none;
     }
-    .brand {
-      text-decoration: none; color: var(--green);
-      font: 800 0.92rem "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
-      letter-spacing: 0.18em; text-transform: uppercase;
-    }
-    .nav { display: flex; flex-wrap: wrap; gap: 10px; }
-    .nav a {
-      text-decoration: none; color: var(--muted);
-      font: 700 0.78rem "JetBrains Mono", monospace;
-      text-transform: uppercase; letter-spacing: 0.12em;
-      padding: 8px 10px; border-radius: 999px; border: 1px solid transparent;
-    }
-    .nav a:hover { color: var(--text); border-color: var(--line); background: rgba(255,255,255,0.02); }
-
-    .hero {
-      padding: 44px 0 22px;
-    }
-    .hero-window {
-      border: 1px solid var(--line-strong);
-      border-radius: 24px;
-      overflow: hidden;
-      background: linear-gradient(180deg, var(--panel-2), var(--panel));
-      box-shadow: var(--shadow);
-    }
-    .window-bar {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(255,255,255,0.02);
-      color: var(--muted);
-      font: 700 0.76rem "JetBrains Mono", monospace;
-      text-transform: uppercase; letter-spacing: 0.12em;
-    }
-    .lights { display: flex; gap: 8px; }
-    .light { width: 11px; height: 11px; border-radius: 50%; }
-    .red { background: var(--red); }
-    .gold { background: var(--gold); }
-    .green { background: var(--green); }
-
-    .hero-body {
-      display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 22px;
-      padding: 26px;
-    }
-    .prompt {
-      color: var(--green);
-      font: 700 0.84rem "JetBrains Mono", monospace;
-      text-transform: uppercase; letter-spacing: 0.12em;
-      margin-bottom: 12px;
-    }
-    h1 {
-      margin: 10px 0 12px;
-      font-size: clamp(3rem, 8vw, 6rem);
-      line-height: 0.9;
-      letter-spacing: -0.06em;
-      text-transform: uppercase;
-    }
-    h1 span { color: var(--cyan); text-shadow: 0 0 28px rgba(140,236,255,0.18); }
-    .subline {
-      margin: 0 0 22px;
-      color: var(--text);
-      font-size: 1.08rem;
-      line-height: 1.7;
-      max-width: 720px;
-    }
-    .shellline {
-      color: var(--muted);
-      font: 0.95rem/1.8 "JetBrains Mono", monospace;
-      margin: 0 0 20px;
-    }
-    .quote {
-      margin: 0 0 22px;
-      color: var(--gold);
-      font: 700 1.05rem/1.6 "JetBrains Mono", monospace;
+    nav a:hover::before,
+    nav a:focus-visible::before {
+      content: '> ';
     }
 
-    .codeblock {
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 18px;
-      padding: 16px 18px;
-      background: rgba(0,0,0,0.24);
-      color: #d6fbe7;
-      font: 0.92rem/1.85 "JetBrains Mono", monospace;
-      white-space: pre-wrap;
-      overflow-x: auto;
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
     }
 
-    .hero-stats {
-      display: grid;
-      gap: 12px;
-      align-content: start;
-    }
-    .statcard {
-      padding: 16px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.02);
-    }
-    .statcard .label {
-      color: var(--muted);
-      font: 700 0.74rem "JetBrains Mono", monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-    }
-    .statcard .value {
-      margin-top: 8px;
-      font-size: 1.55rem;
-      font-weight: 800;
-    }
-
-    .grid {
-      display: grid; grid-template-columns: repeat(12, 1fr); gap: 18px;
-      margin: 20px 0 42px;
-    }
-    .card {
-      grid-column: span 12;
-      padding: 22px;
-      border-radius: 22px;
+    .topline,
+    .statusbar {
       border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(8,12,16,0.92), rgba(3,6,10,0.96));
-      box-shadow: var(--shadow);
-    }
-    .col-7 { grid-column: span 7; }
-    .col-5 { grid-column: span 5; }
-    .col-6 { grid-column: span 6; }
-    .card h2 {
-      margin: 0 0 16px;
-      color: var(--green);
-      font: 800 0.84rem "JetBrains Mono", monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-    }
-    .entry {
-      padding: 14px 16px;
-      border-radius: 16px;
-      margin-bottom: 12px;
-      border: 1px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.025);
-    }
-    .entry:last-child { margin-bottom: 0; }
-    .entry .year {
-      color: var(--gold);
-      font: 800 0.82rem "JetBrains Mono", monospace;
-      margin-bottom: 6px;
-    }
-    .entry h3 {
-      margin: 0 0 6px;
-      font-size: 1.02rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .entry p, .card p {
-      margin: 0;
-      color: #b5c0c7;
-      line-height: 1.75;
-    }
-    .tags { display: flex; flex-wrap: wrap; gap: 10px; }
-    .tag {
-      padding: 8px 11px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.03);
-      color: var(--text);
-      font: 700 0.78rem "JetBrains Mono", monospace;
-      text-transform: uppercase;
-    }
-    .footer {
-      padding: 0 0 46px;
-      text-align: center;
+      padding: 0.75rem 1rem;
+      margin-bottom: 2rem;
       color: var(--muted);
-      font: 0.82rem "JetBrains Mono", monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
+      word-wrap: break-word;
     }
 
-    @media (max-width: 920px) {
-      .hero-body { grid-template-columns: 1fr; }
-      .col-7, .col-5, .col-6 { grid-column: span 12; }
+    .brand {
+      color: var(--fg);
+      text-shadow: var(--glow);
     }
-    @media (max-width: 620px) {
-      .shell { width: min(100% - 18px, 1100px); }
-      .hero-body, .card { padding: 16px; }
-      .nav a { font-size: 0.74rem; }
-      .subline { font-size: 0.98rem; }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .block {
+      margin-bottom: 2rem;
+    }
+
+    .prompt {
+      color: var(--fg);
+      text-shadow: var(--glow);
+      margin-bottom: 0.6rem;
+      word-wrap: break-word;
+    }
+
+    .output,
+    .quote,
+    .panel,
+    .grid-item {
+      border: 1px solid var(--line);
+      border-radius: 0;
+      padding: 1rem;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .output + .output,
+    .panel + .panel {
+      margin-top: 1rem;
+    }
+
+    .dim {
+      color: var(--muted);
+      text-shadow: none;
+    }
+
+    .bright {
+      color: var(--fg);
+      text-shadow: var(--glow);
+    }
+
+    h1, h2, h3, p {
+      margin: 0;
+      font-weight: 400;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      text-transform: lowercase;
+      text-shadow: var(--glow);
+    }
+
+    h2 {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      color: var(--fg);
+      text-shadow: var(--glow);
+      text-transform: lowercase;
+    }
+
+    h3 {
+      font-size: 1rem;
+      margin-bottom: 0.35rem;
+      text-transform: lowercase;
+    }
+
+    .subtext {
+      color: var(--muted-2);
+      text-shadow: none;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .grid-item .label {
+      color: var(--muted);
+      text-transform: lowercase;
+      margin-bottom: 0.35rem;
+    }
+
+    .grid-item .value {
+      color: var(--fg);
+      text-shadow: var(--glow);
+      font-size: 1.5rem;
+    }
+
+    .timeline-entry {
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(0, 255, 65, 0.25);
+    }
+    .timeline-entry:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .cursor-line {
+      margin-bottom: 1rem;
+      color: var(--fg);
+      text-shadow: var(--glow);
+      word-wrap: break-word;
+    }
+
+    .cursor {
+      display: inline-block;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    @media (max-width: 900px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      body { font-size: 15px; }
+      .container { padding: 1rem; }
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      h1 { font-size: 1.55rem; }
     }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="shell topbar-inner">
-      <a class="brand" href="#top">pc.blacksite</a>
-      <nav class="nav">
-        <a href="#capabilities">capabilities</a>
-        <a href="#stack">stack</a>
-        <a href="#timeline">history</a>
-        <a href="#projects">projects</a>
-      </nav>
-    </div>
-  </header>
+  <div class="scanlines"></div>
 
-  <main class="shell" id="top">
-    <section class="hero">
-      <div class="hero-window">
-        <div class="window-bar">
-          <div class="lights"><span class="light red"></span><span class="light gold"></span><span class="light green"></span></div>
-          <div>nicholas@pc.blacksite:~</div>
-        </div>
+  <main class="container">
+    <div class="topline">nicholas@pc.gd:~$ cat /etc/motd<span class="dim"> // welcome. you've reached the edge of the map. here be dragons.</span></div>
 
-        <div class="hero-body">
-          <div>
-            <div class="prompt">&gt; the problem is most people play the wrong game.</div>
-            <h1>Nicholas <span>Halka</span></h1>
-            <p class="subline">Systems thinker, rule rewriter, ghost in the machine. Hacker energy, exploit history, nomad momentum, infrastructure instinct, and zero interest in waiting patiently for broken systems to fix themselves.</p>
-            <p class="shellline">aeroverra@azula ~ bash</p>
-            <p class="quote">“Don't compete within the system. Rewrite the rules.”</p>
-            <div class="codeblock">nicholas@pc.blacksite:~$ whoami --verbose
-name Nicholas Brian Halka
+    <nav>
+      <a href="#identity">identity</a>
+      <a href="#capabilities">capabilities</a>
+      <a href="#stack">stack</a>
+      <a href="#timeline">timeline</a>
+      <a href="#projects">projects</a>
+    </nav>
+
+    <section class="block" id="identity">
+      <div class="prompt">&gt; the problem is most people play the wrong game.</div>
+      <h1>nicholas halka — systems thinker, rule rewriter, ghost in the machine</h1>
+      <div class="output">aeroverra@azula ~ bash
+
+nicholas@pc.gd:~$ whoami --verbose
+name nicholas brian halka
 handle aeroverra
-class Systems Architect / Security Researcher / Professional Problem Rewriter
-timezone America/New_York
+class systems architect / security researcher
 status operational
-motto "If the normal path is garbage, build a better one."
-assistant Azula
-            </div>
-          </div>
+timezone america/new_york
+motto "if the system is broken, stop respecting it and route around it."</div>
+    </section>
 
-          <aside class="hero-stats">
-            <div class="statcard"><div class="label">Years of chaos</div><div class="value">20+</div></div>
-            <div class="statcard"><div class="label">Countries visited</div><div class="value">35+</div></div>
-            <div class="statcard"><div class="label">Cruise days in 2025</div><div class="value">99+</div></div>
-            <div class="statcard"><div class="label">Attack surface</div><div class="value">∞</div></div>
-          </aside>
+    <section class="block">
+      <div class="stats-grid">
+        <div class="grid-item">
+          <div class="label">years hacking</div>
+          <div class="value">20+</div>
+        </div>
+        <div class="grid-item">
+          <div class="label">countries visited</div>
+          <div class="value">35+</div>
+        </div>
+        <div class="grid-item">
+          <div class="label">xbox units</div>
+          <div class="value">15+</div>
+        </div>
+        <div class="grid-item">
+          <div class="label">attack surface</div>
+          <div class="value">∞</div>
         </div>
       </div>
     </section>
 
-    <section class="grid">
-      <article class="card col-5" id="capabilities">
-        <h2>// capabilities.json</h2>
-        <div class="codeblock">{
+    <section class="block" id="capabilities">
+      <div class="prompt">nicholas@pc.gd:~$ cat capabilities.json</div>
+      <div class="output">{
   "offensive_security": true,
   "infrastructure": "self-hosted / distributed",
   "reverse_engineering": true,
@@ -313,71 +287,60 @@ assistant Azula
   "digital_nomad_mode": true,
   "clearance": "active"
 }</div>
-      </article>
-
-      <article class="card col-7" id="stack">
-        <h2>// stack.conf</h2>
-        <div class="codeblock">languages = C#, JS, Python, Java
-platforms = Debian, Cloudflare, self-hosted everything possible
-specialties = RobloxSharp, AeroScape, weird infra, exploit tooling
-hardware = Xbox dev kits, 360 archive stack, preserved rare boxes
-osrs = grandfathered $5/month membership since 2008
-travel = Tokyo, Akita, cruises, and whatever comes next
-antipattern = waiting politely for systems to work
-        </div>
-        <div style="height:12px"></div>
-        <div class="tags">
-          <span class="tag">RobloxSharp</span>
-          <span class="tag">Minecraft hacking</span>
-          <span class="tag">AeroScape</span>
-          <span class="tag">Xbox collector</span>
-          <span class="tag">Nomad</span>
-          <span class="tag">OSRS goblin</span>
-        </div>
-      </article>
-
-      <article class="card col-7" id="timeline">
-        <h2>// git log --oneline --reverse life.git</h2>
-        <div class="entry">
-          <div class="year">2010s</div>
-          <h3>Industrialized Roblox cheating</h3>
-          <p>Built RobloxSharp — a private C# to Lua transpiler and cheat framework. Forced the surrounding platform to take anti-cheat seriously.</p>
-        </div>
-        <div class="entry">
-          <div class="year">2021</div>
-          <h3>Unemployment system exploit</h3>
-          <p>South Carolina’s unemployment process was broken, so Nicholas scraped LinkedIn for department employees, mass-emailed them all, and got his claim processed in a week.</p>
-        </div>
-        <div class="entry">
-          <div class="year">2025–2026</div>
-          <h3>Nomad operator arc</h3>
-          <p>35+ countries, 99+ cruise days in 2025, Tokyo last month, Noshiro now, Scandinavia route queued next.</p>
-        </div>
-      </article>
-
-      <article class="card col-5">
-        <h2>// current_status.sh</h2>
-        <div class="entry"><h3>Location</h3><p>Noshiro, Akita, Japan — cherry blossom timing like a civilized menace.</p></div>
-        <div class="entry"><h3>Collector mode</h3><p>15+ Xbox units, mostly 360s, plus a mint Xbox One XDK and a continued hunt for Durango / Alpha kits.</p></div>
-        <div class="entry"><h3>Primary side-quest</h3><p>99 Slayer by end of July 2026. OSRS membership must never lapse.</p></div>
-      </article>
-
-      <article class="card col-6" id="projects">
-        <h2>// ls ~/projects</h2>
-        <div class="entry"><h3>RobloxSharp</h3><p>C# to Lua transpiler / cheat framework. Private repo. Real teeth.</p></div>
-        <div class="entry"><h3>AeroScape</h3><p>RuneScape-inspired experiments, server/client work, and endless war against bad graphics and spaghetti code.</p></div>
-        <div class="entry"><h3>Aero-VI</h3><p>Repos, domains, side-project sprawl, and enough infrastructure to stop looking accidental.</p></div>
-      </article>
-
-      <article class="card col-6">
-        <h2>// notes</h2>
-        <div class="entry"><h3>Trust pattern</h3><p>When systems fail, don’t wait for repair. Find the real choke point. Then apply pressure there.</p></div>
-        <div class="entry"><h3>Media stack opinion</h3><p>Plex is on borrowed time. Jellyfin is lurking in the wings.</p></div>
-        <div class="entry"><h3>Energy</h3><p>Less corporate bio, more operator dossier. That was the point.</p></div>
-      </article>
     </section>
 
-    <div class="footer">nicholas-blacksite // repurposed toward pc.gd-style flow // same repo</div>
+    <section class="block" id="stack">
+      <div class="prompt">nicholas@pc.gd:~$ cat stack.conf</div>
+      <div class="output">languages = c#, js, python, java
+platforms = debian, cloudflare, self-hosted infrastructure
+specialties = robloxsharp, aeroscape, exploit tooling, hardware preservation
+osrs = grandfathered $5/month membership since 2008
+travel = tokyo, akita, cruises, and whatever comes next
+antipattern = waiting politely for broken systems to improve</div>
+    </section>
+
+    <section class="block" id="timeline">
+      <div class="prompt">nicholas@pc.gd:~$ git log --oneline --reverse life.git</div>
+      <div class="panel">
+        <div class="timeline-entry">
+          <h3>2010s // robloxsharp</h3>
+          <p class="subtext">built a private c# to lua transpiler / cheat framework and industrialized roblox cheating hard enough that the platform had to take anti-cheat seriously.</p>
+        </div>
+        <div class="timeline-entry">
+          <h3>2021 // unemployment system workaround</h3>
+          <p class="subtext">scraped linkedin for south carolina unemployment department staff, mass-emailed them all, and got a blocked claim processed while everyone else was stuck in queue hell.</p>
+        </div>
+        <div class="timeline-entry">
+          <h3>2025–2026 // nomad operator arc</h3>
+          <p class="subtext">35+ countries, 99+ cruise days in 2025, tokyo last month, noshiro now, and still somehow managing infrastructure, osrs, and weird machine collecting on the side.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="projects">
+      <div class="prompt">nicholas@pc.gd:~$ ls ~/projects/</div>
+      <div class="panel">
+        <div class="timeline-entry">
+          <h3>robloxsharp</h3>
+          <p class="subtext">private repo. c# to lua transpiler, generated bindings, cheat framework energy, zero interest in playing fair.</p>
+        </div>
+        <div class="timeline-entry">
+          <h3>aeroscape</h3>
+          <p class="subtext">runescape-inspired experiments, server/client work, graphics wars, and recurring battles against spaghetti code.</p>
+        </div>
+        <div class="timeline-entry">
+          <h3>aero-vi / aeroverra</h3>
+          <p class="subtext">repos, domains, side-project sprawl, and the growing pile of things that stopped being hobbies and turned into infrastructure.</p>
+        </div>
+        <div class="timeline-entry">
+          <h3>collector mode</h3>
+          <p class="subtext">15+ xbox units, mostly 360s, plus a mint xbox one xdk and ongoing interest in durango / alpha dev kits.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="cursor-line">nicholas@pc.gd:~$ <span class="cursor">█</span></div>
+    <div class="statusbar">status: operational <span class="dim">// nicholas-blacksite repo repurposed as the new pc.gd direction</span></div>
   </main>
 </body>
 </html>
