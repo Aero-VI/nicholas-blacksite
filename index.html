@@ -3,22 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aeroverra @ pc.gd // nicholas halka</title>
-  <meta name="description" content="terminal dossier — nicholas brian halka / aeroverra. systems thinker, rule rewriter, ghost in the machine. robloxsharp, aeroscape, infrastructure, 35+ countries." />
+  <title>aeroverra @ blacksite // nicholas halka</title>
+  <meta name="description" content="terminal dossier — nicholas brian halka / aeroverra. systems thinker. rule rewriter. robloxsharp, aeroscape, aero-vi. 35+ countries, 99+ cruise days '25." />
   <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#0a0a0a" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=VT323&display=swap" />
   <style>
     :root {
       --bg: #0a0a0a;
       --fg: #00ff41;
       --muted: #6b7280;
       --muted-2: #888888;
-      --rule: rgba(0, 255, 65, 0.25);
+      --rule: rgba(0, 255, 65, 0.22);
+      --rule-strong: #00ff41;
       --glow: 0 0 4px rgba(0, 255, 65, 0.4);
+      --bar-fill: #00ff41;
+      --bar-empty: #1f2937;
     }
 
-    * { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; background: var(--bg); }
+    html {
+      background: var(--bg);
+      scroll-behavior: smooth;
+    }
 
     body {
       background: var(--bg);
@@ -30,43 +40,52 @@
       -webkit-font-smoothing: antialiased;
       text-rendering: geometricPrecision;
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
-    ::selection {
-      background: var(--fg);
-      color: var(--bg);
-      text-shadow: none;
-    }
+    ::selection { background: var(--fg); color: var(--bg); text-shadow: none; }
 
+    /* scanlines overlay */
     .scanlines {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 10;
+      position: fixed; inset: 0; pointer-events: none; z-index: 20;
       background: repeating-linear-gradient(
         to bottom,
-        rgba(0, 0, 0, 0) 0,
-        rgba(0, 0, 0, 0) 2px,
-        rgba(0, 0, 0, 0.12) 3px,
-        rgba(0, 0, 0, 0.12) 4px
+        rgba(0,0,0,0) 0,
+        rgba(0,0,0,0) 2px,
+        rgba(0,0,0,0.12) 3px,
+        rgba(0,0,0,0.12) 4px
       );
+    }
+    /* tiny crt flicker */
+    .scanlines::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(0,255,65,0.012);
+      animation: flicker 6s infinite steps(1);
+    }
+    @keyframes flicker {
+      0%,97%,100% { opacity: 1; }
+      98% { opacity: 0.85; }
+      99% { opacity: 1.05; }
     }
 
     a {
       color: var(--fg);
       text-decoration: none;
       text-shadow: var(--glow);
+      border-bottom: 1px dashed transparent;
     }
-    a:hover,
-    a:focus-visible {
+    a:hover, a:focus-visible {
       background: var(--fg);
       color: var(--bg);
       text-shadow: none;
       outline: none;
+      border-bottom-color: transparent;
     }
-    a.nav:hover::before,
-    a.nav:focus-visible::before { content: '> '; }
+    a.lnk::before { content: ''; }
+    a.lnk:hover::before, a.lnk:focus-visible::before { content: '> '; }
 
+    /* layout */
     .container {
       max-width: 900px;
       margin: 0 auto;
@@ -75,49 +94,95 @@
       z-index: 1;
     }
 
+    /* status bar at top + bottom */
     .bar {
-      border: 1px solid var(--fg);
-      padding: 0.5rem 0.9rem;
+      border: 1px solid var(--rule-strong);
+      padding: 0.55rem 0.9rem;
       color: var(--muted);
       text-shadow: none;
       word-wrap: break-word;
       overflow-wrap: anywhere;
+      font-size: 0.92em;
     }
     .bar .hi { color: var(--fg); text-shadow: var(--glow); }
     .bar .sep { color: var(--muted); padding: 0 0.4rem; }
+    header.bar { margin-bottom: 1.5rem; }
 
-    header.bar { margin-bottom: 2rem; }
-    footer.bar { margin-top: 0.75rem; }
+    /* boot lines (faux syslog) */
+    .boot { color: var(--muted); text-shadow: none; margin: 0 0 1.5rem 0; }
+    .boot .row { word-wrap: break-word; overflow-wrap: anywhere; white-space: pre-wrap; }
+    .boot .ts  { color: var(--muted-2); }
+    .boot .ok  { color: var(--fg); text-shadow: var(--glow); }
 
-    .motto {
+    /* /etc/motd */
+    .motd {
+      border-left: 1px solid var(--rule-strong);
+      padding: 0.4rem 0 0.4rem 0.9rem;
       color: var(--muted-2);
       text-shadow: none;
-      margin-bottom: 2rem;
+      margin-bottom: 2.5rem;
+      white-space: pre-wrap;
       word-wrap: break-word;
     }
-    .motto .hi { color: var(--fg); text-shadow: var(--glow); }
+    .motd .hi { color: var(--fg); text-shadow: var(--glow); }
+    .motd .warn { color: var(--fg); text-shadow: var(--glow); letter-spacing: 0.06em; }
 
-    nav {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem 1.25rem;
-      margin-bottom: 2.5rem;
+    /* identity / ASCII hero */
+    .hero { margin: 1.5rem 0 2rem 0; }
+    .hero pre.ascii {
+      margin: 0 0 0.6rem 0;
+      color: var(--fg);
+      text-shadow: var(--glow);
+      font-size: 0.95em;
+      line-height: 1.05;
+      white-space: pre;
+      overflow-x: auto;
+      overflow-y: hidden;
+      letter-spacing: 0;
     }
+    .hero .sub {
+      color: var(--muted-2);
+      text-shadow: none;
+      margin: 0;
+    }
+    .hero .sub .hi { color: var(--fg); text-shadow: var(--glow); }
+    .hero .tag {
+      color: var(--fg);
+      text-shadow: var(--glow);
+      margin-top: 0.6rem;
+      word-wrap: break-word;
+    }
+    .hero .tag .dim { color: var(--muted); text-shadow: none; }
 
+    /* nav */
+    nav {
+      display: flex; flex-wrap: wrap;
+      gap: 0.35rem 1.25rem;
+      margin: 1rem 0 2.5rem 0;
+      color: var(--muted);
+      text-shadow: none;
+    }
+    nav a { color: var(--fg); }
+
+    /* section */
     section { margin-bottom: 2.5rem; }
-
+    .label {
+      color: var(--muted);
+      text-shadow: none;
+      margin: 0 0 0.5rem 0;
+      letter-spacing: 0.04em;
+    }
     .cmd {
       color: var(--fg);
       text-shadow: var(--glow);
-      margin: 0 0 0.6rem 0;
+      margin: 0 0 0.7rem 0;
       word-wrap: break-word;
       overflow-wrap: anywhere;
       white-space: pre-wrap;
     }
     .cmd .dim { color: var(--muted); text-shadow: none; }
 
-    pre.out,
-    .out {
+    pre.out, .out {
       margin: 0;
       color: var(--muted-2);
       text-shadow: none;
@@ -130,47 +195,111 @@
     }
     .out .hi { color: var(--fg); text-shadow: var(--glow); }
     .out .dim { color: var(--muted); text-shadow: none; }
+    .out .star { color: var(--fg); text-shadow: var(--glow); }
 
+    /* stats grid */
     .stats {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 0.75rem;
-      margin-bottom: 2.5rem;
+      margin: 0 0 2.75rem 0;
     }
     .stat {
-      border: 1px solid var(--fg);
+      border: 1px solid var(--rule-strong);
       padding: 0.85rem 1rem;
     }
     .stat .k {
       color: var(--muted);
       text-shadow: none;
-      font-size: 0.88em;
+      font-size: 0.82em;
       text-transform: lowercase;
     }
     .stat .v {
       color: var(--fg);
       text-shadow: var(--glow);
-      font-size: 1.55rem;
+      font-size: 1.5rem;
       margin-top: 0.2rem;
+      letter-spacing: 0.02em;
+    }
+    .stat .u { color: var(--muted-2); text-shadow: none; font-size: 0.7em; padding-left: 0.25rem; }
+
+    /* threat bars */
+    .bars { margin: 0; padding: 0; list-style: none; }
+    .bars li { margin: 0 0 0.55rem 0; word-wrap: break-word; }
+    .bars .row {
+      display: grid;
+      grid-template-columns: minmax(7.5rem, 12rem) 1fr 3.2rem;
+      gap: 0.85rem;
+      align-items: center;
+    }
+    .bars .nm { color: var(--muted-2); text-shadow: none; }
+    .bars .pct { color: var(--fg); text-shadow: var(--glow); text-align: right; }
+    .bars .track {
+      position: relative;
+      height: 0.85rem;
+      border: 1px solid var(--rule);
+      background: transparent;
+    }
+    .bars .fill {
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      background: var(--fg);
+      box-shadow: var(--glow);
+      width: 0;
+      animation: barfill 1.4s cubic-bezier(.2,.8,.2,1) forwards;
+    }
+    @keyframes barfill { to { width: var(--w, 0%); } }
+    @media (max-width: 560px) {
+      .bars .row {
+        grid-template-columns: 1fr 3rem;
+        grid-template-rows: auto auto;
+      }
+      .bars .nm { grid-column: 1 / -1; }
+      .bars .track { grid-column: 1 / 2; }
+      .bars .pct  { grid-column: 2 / 3; }
     }
 
-    h1, h2, h3, p {
-      margin: 0;
-      font-weight: 400;
-      text-transform: lowercase;
+    /* timeline rows */
+    .log .row {
+      display: grid;
+      grid-template-columns: 6.5rem 1fr;
+      gap: 1rem;
+      margin: 0 0 0.45rem 0;
+      align-items: baseline;
+    }
+    .log .when { color: var(--fg); text-shadow: var(--glow); }
+    .log .what { color: var(--muted-2); text-shadow: none; word-wrap: break-word; }
+    .log .what em { font-style: normal; color: var(--fg); text-shadow: var(--glow); }
+    @media (max-width: 560px) {
+      .log .row { grid-template-columns: 5rem 1fr; gap: 0.65rem; }
     }
 
-    .rule {
-      border: 0;
-      border-top: 1px solid var(--rule);
-      margin: 2.25rem 0;
+    /* projects ls */
+    .ls .row {
+      display: grid;
+      grid-template-columns: 11ch 14ch 1fr;
+      gap: 0.85rem;
+      margin: 0 0 0.35rem 0;
+      align-items: baseline;
+    }
+    .ls .perm { color: var(--muted); text-shadow: none; }
+    .ls .name { color: var(--fg); text-shadow: var(--glow); }
+    .ls .desc { color: var(--muted-2); text-shadow: none; word-wrap: break-word; }
+    @media (max-width: 560px) {
+      .ls .row { grid-template-columns: 13ch 1fr; }
+      .ls .perm { display: none; }
     }
 
-    .cursor-line {
+    h1, h2, h3, p { margin: 0; font-weight: 400; text-transform: lowercase; }
+
+    /* divider */
+    .rule { border: 0; border-top: 1px solid var(--rule); margin: 2.25rem 0; }
+
+    /* prompt + cursor at bottom */
+    .prompt-line {
       color: var(--fg);
       text-shadow: var(--glow);
-      margin-top: 2.25rem;
-      margin-bottom: 0.75rem;
+      margin: 2.25rem 0 0.75rem 0;
       word-wrap: break-word;
       overflow-wrap: anywhere;
     }
@@ -186,123 +315,241 @@
     }
     @keyframes blink { 50% { opacity: 0; } }
 
+    /* footer pings */
+    footer.bar { margin-top: 0.75rem; }
+    .pulse {
+      display: inline-block;
+      width: 0.55em; height: 0.55em;
+      background: var(--fg);
+      box-shadow: var(--glow);
+      vertical-align: 0.05em;
+      margin-right: 0.35em;
+      animation: pulse 1.6s ease-out infinite;
+    }
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(0,255,65,0.5); }
+      70%  { box-shadow: 0 0 0 0.5em rgba(0,255,65,0); }
+      100% { box-shadow: 0 0 0 0 rgba(0,255,65,0); }
+    }
+
+    /* reveal-on-load */
+    .reveal { opacity: 0; transform: translateY(0.25rem); transition: opacity .55s ease, transform .55s ease; }
+    .reveal.on { opacity: 1; transform: translateY(0); }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
+      .bars .fill { animation: none; width: var(--w, 0%); }
+      .scanlines::after, .pulse, .cursor { animation: none; }
+    }
+
+    /* responsive */
     @media (max-width: 900px) {
       .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 560px) {
+      body { font-size: 14px; }
       .container { padding: 1.25rem; }
       .stats { grid-template-columns: 1fr; }
       nav { gap: 0.25rem 1rem; }
+      .hero pre.ascii { font-size: 0.78em; }
     }
   </style>
 </head>
 <body>
-  <div class="scanlines"></div>
+  <div class="scanlines" aria-hidden="true"></div>
 
   <main class="container">
 
-    <header class="bar">
-      [ <span class="hi">tty0</span> ]<span class="sep">:</span>aeroverra@pc.gd<span class="sep">:</span>last login 2026-04-22 04:17 jst<span class="sep">:</span>src <span class="hi">100.64.x.x</span> (noshiro, akita, jp)<span class="sep">:</span>secure
+    <header class="bar" role="banner">
+      [ <span class="hi">tty0</span> ]<span class="sep">:</span>aeroverra@blacksite<span class="sep">:</span>last login 2026-04-22 04:17 jst<span class="sep">:</span>src <span class="hi">100.64.x.x</span> <span class="sep">/</span> noshiro, akita, jp<span class="sep">:</span><span class="hi">secure</span>
     </header>
 
-    <div class="motto">// the problem is most people play the wrong game. i play the one the <span class="hi">rules</span> are made out of.</div>
+    <pre class="boot reveal" aria-label="login transcript">
+<span class="row"><span class="ts">2026-04-22t04:17:21+09:00</span> sshd[8814]: accepted publickey for <span class="ok">aeroverra</span> from 100.64.x.x port 47291 ssh2: ed25519 sha256:ae:ro:vi:…</span>
+<span class="row"><span class="ts">2026-04-22t04:17:22+09:00</span> systemd[1]: started session-7.scope &mdash; session 7 of user aeroverra.</span>
+<span class="row"><span class="ts">2026-04-22t04:17:23+09:00</span> motd[blacksite]: handshake complete. 0 packet loss. <span class="ok">green light</span>.</span></pre>
 
-    <nav>
-      <a class="nav" href="#who">who</a>
-      <a class="nav" href="#stats">stats</a>
-      <a class="nav" href="#stack">stack</a>
-      <a class="nav" href="#projects">projects</a>
-      <a class="nav" href="#timeline">timeline</a>
-      <a class="nav" href="#field">field</a>
-      <a class="nav" href="#collector">collector</a>
-      <a class="nav" href="#contact">contact</a>
-    </nav>
+    <pre class="motd reveal" aria-label="message of the day">
+<span class="warn">*** unauthorized access is logged and ridiculed ***</span>
 
-    <section id="who">
-      <p class="cmd">$ whoami --verbose</p>
-<pre class="out"><span class="hi">nicholas brian halka</span> <span class="dim">aka</span> aeroverra
-systems thinker / rule rewriter / ghost in the machine.
-self-proclaimed best roblox cheat developer and minecraft hacker ever.
-currently: <span class="hi">noshiro, akita, jp</span>. last month: tokyo. next: undeclared.</pre>
+operator      <span class="hi">aeroverra</span>
+session       7
+last login    tue 2026-04-22 04:11 jst from osaka
+welcome. the system has nothing to sell you.
+nothing here is auto-generated. read at your own pace.</pre>
+
+    <section class="hero reveal" aria-label="identity">
+<pre class="ascii" aria-hidden="true"> █████╗ ███████╗██████╗  ██████╗
+██╔══██╗██╔════╝██╔══██╗██╔═══██╗
+███████║█████╗  ██████╔╝██║   ██║
+██╔══██║██╔══╝  ██╔══██╗██║   ██║
+██║  ██║███████╗██║  ██║╚██████╔╝
+╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝ ╚═════╝</pre>
+      <p class="sub">&mdash; <span class="hi">verra</span> &middot; nicholas brian halka &middot; blacksite/01</p>
+      <p class="tag">&gt; the problem is most people play the wrong game. <span class="dim">i play the one the rules are made out of.</span></p>
     </section>
 
-    <section id="stats" aria-label="stats">
+    <nav aria-label="sections">
+      <a class="lnk" href="#stats">stats</a>
+      <a class="lnk" href="#whoami">whoami</a>
+      <a class="lnk" href="#manifest">manifest</a>
+      <a class="lnk" href="#config">config</a>
+      <a class="lnk" href="#threat">threat-level</a>
+      <a class="lnk" href="#log">git-log</a>
+      <a class="lnk" href="#projects">projects</a>
+      <a class="lnk" href="#field">field.log</a>
+      <a class="lnk" href="#hardware">hardware</a>
+      <a class="lnk" href="#contact">contact</a>
+    </nav>
+
+    <section id="stats" class="reveal" aria-label="metrics">
+      <p class="label">// runtime.metrics</p>
       <div class="stats">
-        <div class="stat"><div class="k">countries</div><div class="v">35+</div></div>
-        <div class="stat"><div class="k">cruise days '25</div><div class="v">99+</div></div>
-        <div class="stat"><div class="k">xbox units</div><div class="v">15+</div></div>
-        <div class="stat"><div class="k">osrs streak</div><div class="v">18y</div></div>
+        <div class="stat"><div class="k">countries lifetime</div><div class="v">35<span class="u">+</span></div></div>
+        <div class="stat"><div class="k">cruise days '25</div><div class="v">99<span class="u">+</span></div></div>
+        <div class="stat"><div class="k">xbox fleet</div><div class="v">15<span class="u">+</span></div></div>
+        <div class="stat"><div class="k">osrs streak</div><div class="v">216<span class="u">mo</span></div></div>
       </div>
     </section>
 
-    <section id="stack">
-      <p class="cmd">$ neofetch --compact</p>
-<pre class="out">host         <span class="dim">:</span> <span class="hi">aeroverra@pc.gd</span>
-os           <span class="dim">:</span> debian stable (mutated)
-kernel       <span class="dim">:</span> systems-thinker 4.7-aero
-shell        <span class="dim">:</span> zsh + tmux + tailscale
-languages    <span class="dim">:</span> c#, js, python, java, lua
-platforms    <span class="dim">:</span> cloudflare, self-hosted, anything with ssh
-specialties  <span class="dim">:</span> robloxsharp, aeroscape, exploit tooling, hardware archival
-antipattern  <span class="dim">:</span> waiting politely for broken systems to improve
-status       <span class="dim">:</span> <span class="hi">operational</span></pre>
+    <section id="whoami" class="reveal">
+      <p class="cmd">aeroverra@blacksite:~$ whoami --verbose</p>
+<pre class="out">name        <span class="dim">::</span> <span class="hi">nicholas brian halka</span>
+handle      <span class="dim">::</span> aeroverra <span class="dim">(github, everywhere)</span>
+class       <span class="dim">::</span> systems thinker / rule rewriter / ghost in the machine
+title       <span class="dim">::</span> self-proclaimed best <span class="hi">roblox</span> cheat dev &amp; <span class="hi">minecraft</span> hacker ever <span class="dim">(unverifiable, undefeated)</span>
+clearance   <span class="dim">::</span> self-issued, non-revocable
+location    <span class="dim">::</span> <span class="hi">noshiro, akita, jp</span> <span class="dim">— last month: tokyo. next: undeclared.</span>
+status      <span class="dim">::</span> <span class="hi">operational</span></pre>
     </section>
 
-    <section id="projects">
-      <p class="cmd">$ ls -la ~/projects/</p>
-<pre class="out">drwxr-xr-x  <span class="hi">robloxsharp/</span>   c# → lua transpiler + cheat framework. private.
-drwxr-xr-x  <span class="hi">aeroscape/</span>     runescape-class server + client. graphics wars, spaghetti exorcisms.
-drwxr-xr-x  <span class="hi">aero-vi/</span>       identity, domains, infra glue. the umbrella.
--rwxr-xr-x  <span class="hi">mc-ops</span>         industrial minecraft exploit research. not shipping.
-drwxr-xr-x  <span class="hi">.collector/</span>    xbox 360, xbox one xdk, durango/alpha hunt.</pre>
+    <section id="manifest" class="reveal">
+      <p class="cmd">aeroverra@blacksite:~$ cat ~/.config/manifest.toml</p>
+<pre class="out"><span class="dim">[doctrine]</span>
+rule_0  = <span class="hi">"don't compete inside the system. rewrite it."</span>
+rule_1  = "the right move is usually the unsanctioned one."
+rule_2  = "ship before someone tells you you can't."
+rule_3  = "if a process exists to slow you down, route around it."
+
+<span class="dim">[posture]</span>
+default = build
+fallback = build harder
+patience_for_meetings = false
+patience_for_broken_systems = expired
+
+<span class="dim">[locale]</span>
+home    = "wherever the latency is lowest"
+2025    = "99+ days at sea, 12+ stamps, 35+ countries lifetime"
+now     = "noshiro / akita / jp"</pre>
     </section>
 
-    <section id="timeline">
-      <p class="cmd">$ git log --oneline --graph life.git</p>
-<pre class="out"><span class="hi">*</span> 2026.04  head → noshiro, akita, jp. infra warm. osrs active.
-<span class="hi">*</span> 2026.03  tokyo. logged in, shipped, ate, left.
-<span class="hi">*</span> 2025     99+ cruise days. 12+ country stamps. tmux over ltea everywhere.
-<span class="hi">*</span> 2021     sc unemployment queue stalls → scrape dept linkedin → cc every human → claim unblocked in 48h.
-<span class="hi">*</span> 2010s    robloxsharp ships. c#→lua. industrialized cheating until the platform had to answer.
-<span class="hi">*</span> 2008     osrs $5/mo membership grandfathered. never let it lapse. not once.
-<span class="hi">*</span> init     one kid, one keyboard, a lot of wrong things to make right.</pre>
+    <section id="config" class="reveal">
+      <p class="cmd">aeroverra@blacksite:~$ neofetch --no-logo</p>
+<pre class="out">host         <span class="dim">::</span> <span class="hi">aeroverra@blacksite</span>
+os           <span class="dim">::</span> debian (mutated)
+kernel       <span class="dim">::</span> systems-thinker 4.7-aero
+uptime       <span class="dim">::</span> ~30y &middot; sleep cycle: ~6h, drifting
+shell        <span class="dim">::</span> zsh + tmux + tailscale
+languages    <span class="dim">::</span> c#, lua, ts/js, python, java, asm where it counts
+platforms    <span class="dim">::</span> cloudflare, self-hosted, anything with ssh
+specialties  <span class="dim">::</span> robloxsharp, aeroscape, exploit research, hardware archival
+ai_stack     <span class="dim">::</span> claude, gpt, gemini, grok &middot; agent fleet
+playback     <span class="dim">::</span> hardstyle, lo-fi, vinyl on layovers
+status       <span class="dim">::</span> <span class="hi">operational</span> &middot; 0% packet loss</pre>
     </section>
 
-    <section id="field">
-      <p class="cmd">$ tail -f ~/field/hall_of_fame.log</p>
-<pre class="out">[<span class="hi">roblox</span>]     shipped robloxsharp. c# → lua transpiler, generated bindings, cheat framework. forced anti-cheat to grow up.
-[<span class="hi">minecraft</span>]  no public flag. everyone from that era knows.
-[<span class="hi">ops</span>]        sc unemployment. scraped every staffer off linkedin, mass-mailed, cc'd the chain. blocked claim moved in 48h.
-[<span class="hi">travel</span>]     99+ cruise days in a single year. 35+ countries stamped. infrastructure never blinked.
-[<span class="hi">osrs</span>]       $5/mo grandfathered membership since 2008. ~216 consecutive months and counting.</pre>
+    <section id="threat" class="reveal">
+      <p class="cmd">aeroverra@blacksite:~$ sudo threat-level --self <span class="dim"># self-assessment, calibrated</span></p>
+      <ul class="bars" aria-label="threat level">
+        <li><div class="row"><span class="nm">offensive research</span><span class="track"><span class="fill" style="--w:95%; animation-delay:.05s"></span></span><span class="pct">95%</span></div></li>
+        <li><div class="row"><span class="nm">game exploitation</span><span class="track"><span class="fill" style="--w:99%; animation-delay:.10s"></span></span><span class="pct">99%</span></div></li>
+        <li><div class="row"><span class="nm">infra / devops</span><span class="track"><span class="fill" style="--w:92%; animation-delay:.15s"></span></span><span class="pct">92%</span></div></li>
+        <li><div class="row"><span class="nm">reverse engineering</span><span class="track"><span class="fill" style="--w:90%; animation-delay:.20s"></span></span><span class="pct">90%</span></div></li>
+        <li><div class="row"><span class="nm">social engineering</span><span class="track"><span class="fill" style="--w:97%; animation-delay:.25s"></span></span><span class="pct">97%</span></div></li>
+        <li><div class="row"><span class="nm">ai orchestration</span><span class="track"><span class="fill" style="--w:88%; animation-delay:.30s"></span></span><span class="pct">88%</span></div></li>
+        <li><div class="row"><span class="nm">patience</span><span class="track"><span class="fill" style="--w:12%; animation-delay:.35s"></span></span><span class="pct">12%</span></div></li>
+        <li><div class="row"><span class="nm">tolerance for meetings</span><span class="track"><span class="fill" style="--w:4%; animation-delay:.40s"></span></span><span class="pct">4%</span></div></li>
+      </ul>
     </section>
 
-    <section id="collector">
-      <p class="cmd">$ cat ~/hardware/collector.db</p>
-<pre class="out">xbox_360         <span class="dim">:</span> <span class="hi">15+</span> units. serviced. recapped where it mattered.
-xbox_one_xdk     <span class="dim">:</span> <span class="hi">1x</span>. mint. dev firmware, dev dashboard, untouched seals where possible.
-wanted[durango]  <span class="dim">:</span> original durango dev kit. will travel for it.
-wanted[alpha]    <span class="dim">:</span> alpha kit, any gen. authenticity over cosmetics.
-doctrine         <span class="dim">:</span> consoles are history. somebody has to keep the originals running.</pre>
+    <section id="log" class="reveal">
+      <p class="cmd">aeroverra@blacksite:~$ git log --oneline --reverse life.git</p>
+      <div class="out log" role="list">
+        <div class="row" role="listitem"><span class="when">init</span>     <span class="what">one kid, one keyboard, a long list of broken things to fix.</span></div>
+        <div class="row" role="listitem"><span class="when">2008</span>     <span class="what">osrs membership grandfathered at <em>$5/mo</em>. never lapsed. not once.</span></div>
+        <div class="row" role="listitem"><span class="when">2010s</span>    <span class="what">industrial roblox &amp; minecraft exploit research. quiet but loud where it counted.</span></div>
+        <div class="row" role="listitem"><span class="when">2013–15</span>  <span class="what">shipped <em>robloxsharp</em>: c#&rarr;lua transpiler, generated bindings, cheat framework. forced platform anti-cheat to grow up.</span></div>
+        <div class="row" role="listitem"><span class="when">2018</span>     <span class="what"><em>aeroscape</em> ramps. runescape-class server + client, java&rarr;c# port. graphics wars, spaghetti exorcisms.</span></div>
+        <div class="row" role="listitem"><span class="when">2021</span>     <span class="what">sc unemployment claim stalled. scraped dept off linkedin, mass-mailed every staffer, cc'd the chain. <em>moved in 48h.</em></span></div>
+        <div class="row" role="listitem"><span class="when">2024</span>     <span class="what">digital-nomad protocol stabilized. infra survives anywhere with a port and a power outlet.</span></div>
+        <div class="row" role="listitem"><span class="when">2025</span>     <span class="what"><em>99+</em> cruise days. 12+ country stamps. tmux over ltea everywhere. nothing dropped.</span></div>
+        <div class="row" role="listitem"><span class="when">2026.03</span>  <span class="what">tokyo. 31 days. logged in, shipped, ate, left.</span></div>
+        <div class="row" role="listitem"><span class="when">2026.04</span>  <span class="what"><em>head</em> &rarr; noshiro, akita. infra warm. osrs active. next undeclared.</span></div>
+      </div>
     </section>
 
-    <section id="contact">
-      <p class="cmd">$ cat contact.key</p>
-<pre class="out">handle        <span class="dim">:</span> <a href="https://github.com/aeroverra">aeroverra</a> <span class="dim">(github, everywhere else)</span>
-email         <span class="dim">:</span> <a href="mailto:88tontos@gmail.com">88tontos@gmail.com</a>
-signal        <span class="dim">:</span> on request
-location      <span class="dim">:</span> noshiro, akita, jp <span class="dim">(temporary, always temporary)</span>
-availability  <span class="dim">:</span> <span class="hi">open</span> to the right problem. closed to the wrong meeting.</pre>
+    <section id="projects" class="reveal">
+      <p class="cmd">aeroverra@blacksite:~$ ls -la ~/projects/</p>
+      <div class="out ls">
+        <div class="row"><span class="perm">drwxr-xr-x</span><span class="name">robloxsharp/</span><span class="desc">c#&rarr;lua transpiler &middot; generated bindings &middot; cheat framework. private.</span></div>
+        <div class="row"><span class="perm">drwxr-xr-x</span><span class="name">aeroscape/</span>  <span class="desc">runescape-class server + client. graphics wars, spaghetti exorcisms.</span></div>
+        <div class="row"><span class="perm">drwxr-xr-x</span><span class="name">aero-vi/</span>    <span class="desc">identity, domains, infra glue. the umbrella.</span></div>
+        <div class="row"><span class="perm">drwxr-xr-x</span><span class="name">blacksite/</span>  <span class="desc">this. terminal dossier. single file. zero js bloat.</span></div>
+        <div class="row"><span class="perm">-rwxr-xr-x</span><span class="name">mc-ops</span>      <span class="desc">industrial minecraft exploit research. unshipping.</span></div>
+        <div class="row"><span class="perm">drwxr-xr-x</span><span class="name">.collector/</span> <span class="desc">xbox fleet, mint xbox one xdk, durango/alpha hunt.</span></div>
+      </div>
+    </section>
+
+    <section id="field" class="reveal">
+      <p class="cmd">aeroverra@blacksite:~$ tail -n 50 ~/.field.log <span class="dim"># the receipts</span></p>
+<pre class="out">[<span class="hi">roblox</span>]      shipped robloxsharp. c#&rarr;lua transpiler + cheat framework. forced anti-cheat to evolve.
+[<span class="hi">minecraft</span>]   no public flag. anyone from that era already knows.
+[<span class="hi">ops</span>]         sc unemployment held my claim &mdash; scraped dept off linkedin, mass-mailed, cc'd the chain. cleared in 48h.
+[<span class="hi">travel</span>]      99+ cruise days in a single calendar year. 35+ countries lifetime. infra never blinked.
+[<span class="hi">osrs</span>]        $5/mo membership grandfathered since 2008. ~216 consecutive months. not once.
+[<span class="hi">hardware</span>]    15+ xbox units serviced &middot; 1x mint xbox one xdk &middot; durango / alpha hunt active.</pre>
+    </section>
+
+    <section id="hardware" class="reveal">
+      <p class="cmd">aeroverra@blacksite:~$ cat ~/hardware/.collection</p>
+<pre class="out">xbox_360         <span class="dim">::</span> <span class="hi">15+</span> units. serviced. recapped where it mattered.
+xbox_one_xdk     <span class="dim">::</span> <span class="hi">1x</span>. mint. dev firmware, dev dashboard, untouched seals where possible.
+wanted[durango]  <span class="dim">::</span> original durango dev kit. <span class="hi">will travel for it.</span>
+wanted[alpha]    <span class="dim">::</span> alpha kit, any gen. authenticity over cosmetics.
+doctrine         <span class="dim">::</span> consoles are history. somebody has to keep the originals running.</pre>
+    </section>
+
+    <section id="contact" class="reveal">
+      <p class="cmd">aeroverra@blacksite:~$ ssh-keygen -F contact</p>
+<pre class="out">github       <span class="dim">::</span> <a class="lnk" href="https://github.com/aeroverra" rel="me">github.com/aeroverra</a>
+email        <span class="dim">::</span> <a class="lnk" href="mailto:88tontos@gmail.com">88tontos@gmail.com</a>
+matrix       <span class="dim">::</span> on request &middot; <span class="dim">handshake required</span>
+location     <span class="dim">::</span> noshiro / akita / jp <span class="dim">(temporary, always temporary)</span>
+status       <span class="dim">::</span> <span class="hi">open</span> to the right problem. <span class="dim">closed to the wrong meeting.</span></pre>
     </section>
 
     <hr class="rule" />
 
-    <div class="cursor-line">aeroverra@pc.gd:~$ <span class="cursor" aria-hidden="true"></span></div>
+    <p class="prompt-line">aeroverra@blacksite:~$ <span class="cursor" aria-hidden="true"></span></p>
 
-    <footer class="bar">
-      status<span class="sep">:</span><span class="hi">operational</span><span class="sep">:</span>tty0 live<span class="sep">:</span>2026-04-22 jst<span class="sep">:</span><span class="dim">if the system is broken, route around it.</span>
+    <footer class="bar" role="contentinfo">
+      <span class="pulse" aria-hidden="true"></span>connection<span class="sep">:</span><span class="hi">established</span><span class="sep">:</span>latency<span class="sep">:</span><span class="hi">0ms</span><span class="sep">:</span>packets<span class="sep">:</span><span class="hi">0% loss</span><span class="sep">:</span><span class="hi">2026-04-22 jst</span><span class="sep">:</span>blacksite/01
     </footer>
 
   </main>
+
+  <script>
+    // staggered reveal — keeps typography crisp without heavy motion
+    (function () {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var els = document.querySelectorAll('.reveal');
+      if (reduce) {
+        els.forEach(function (el) { el.classList.add('on'); });
+        return;
+      }
+      els.forEach(function (el, i) {
+        setTimeout(function () { el.classList.add('on'); }, 60 + i * 90);
+      });
+    })();
+  </script>
 </body>
 </html>
